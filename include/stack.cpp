@@ -10,8 +10,7 @@
 //////////////////////////////
 
 inline dynamic_bitset::dynamic_bitset(size_t size) noexcept :
-bits(size) {
-	this->reset();
+	bits(size) {
 }
 
 inline auto dynamic_bitset::all() const noexcept -> bool {
@@ -19,6 +18,7 @@ inline auto dynamic_bitset::all() const noexcept -> bool {
 	for (auto i : bits) {
 		if (i == false) {
 			check = false;
+			break;
 		}
 	}
 	return check;
@@ -29,13 +29,20 @@ inline auto dynamic_bitset::any() noexcept -> bool {
 	for (auto i : bits) {
 		if (i == true) {
 			check = true;
+			break;
 		}
 	}
 	return check;
 }
 
 inline auto dynamic_bitset::count() const noexcept -> size_t {
-	return bits.size();
+	size_t counter = 0;
+	for (auto i : bits) {
+		if (i) {
+			++counter;
+		}
+	}
+	return counter;
 }
 
 inline auto dynamic_bitset::flip() noexcept -> void {
@@ -58,6 +65,7 @@ inline auto dynamic_bitset::none() const noexcept -> bool {
 	for (auto i : bits) {
 		if (i == true) {
 			check = false;
+			break;
 		}
 	}
 	return check;
@@ -94,7 +102,7 @@ inline auto dynamic_bitset::set(size_t pos) throw(std::out_of_range) -> void {
 }
 
 inline auto dynamic_bitset::size() const noexcept -> size_t {
-	return bits.capacity();
+	return bits.size();
 }
 
 inline auto dynamic_bitset::test(size_t pos) const throw(std::out_of_range) -> bool {
@@ -135,11 +143,11 @@ inline allocator<T>::allocator(size_t size) :
 template<typename T>
 inline allocator<T>::allocator(allocator const & other) :
 	allocator<T>(other.size_) {
-	for (size_t i = 0; i < bitset_.count(); ++i) {
-		if (bitset_.test(i) == true) {
-		this->construct(this->ptr_ + i, other.ptr_[i]);
+	for (size_t i = 0; i < other.bitset_.count(); ++i) {
+		if (other.bitset_.test(i) == true) {
+			this->construct(this->ptr_ + i, other.ptr_[i]);
 		}
-    }
+	}
 }
 
 template<typename T>
@@ -263,10 +271,10 @@ inline auto stack<T>::pop() -> void {
 
 template<typename T> /*strong*/
 inline auto stack<T>::push(T const & value) -> void {
-	if (alloc.empty() == true || alloc.full() == true) {
+	if (alloc.full() == true) {
 		alloc.resize();
 	}
-	alloc.construct(alloc.get() + alloc.count() - 1, value);
+	alloc.construct(alloc.get() + alloc.count(), value);
 }
 
 template<typename T>
